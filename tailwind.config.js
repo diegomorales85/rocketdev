@@ -1,5 +1,10 @@
+const colors = require('tailwindcss/colors')
 module.exports = {
   content: ['./*.{html,js}'],
+  plugins: [
+    // ...
+    require('@tailwindcss/forms'),
+  ],
   theme: {
     colors: {
       'blue': '#1fb6ff',
@@ -17,6 +22,10 @@ module.exports = {
       serif: ['Merriweather', 'serif'],
     },
     extend: {
+      colors: {
+        'warm-gray': colors.stone,
+        teal: colors.teal,
+      },
       spacing: {
         '8xl': '96rem',
         '9xl': '128rem',
