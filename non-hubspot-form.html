@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./css/main.css" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="blog-suscribe-form">
+  <span class="blog-suscribe-form__title">{{ module.richtext_field }}</span>
+  <form id="suscriptionForm">
+    <div class="blog-suscribe-form__group" id="nameFieldGroup">
+      <input class="blog-suscribe-form__input" type="text" id="nameField" placeholder="Nombre" />
+      <span class="blog-suscribe-form__error-msg" id="nameError">Completa este campo obligatorio.</span>      
+    </div>
+
+    <div class="blog-suscribe-form__group" id="emailFieldGroup">
+      <input class="blog-suscribe-form__input" type="email" id="emailField" placeholder="Correo" />
+      <span class="blog-suscribe-form__error-msg" id="emailError">Completa este campo obligatorio.</span>
+    </div>
+    
+    <div class="blog-suscribe-form__group" id="privacyFieldGroup">
+      <div class="blog-suscribe-form__privacy-field">
+        <input class="blog-suscribe-form__checkbox" type="checkbox" id="privacyField" name="privacyCheck">
+        <label for="privacyCheck">
+          {{ module.text_field_he_leido }} <a class="blog-suscribe-form__privacy-link" href="{{ module.privacy_url }}" target="_blank">{{ module.text_field_politica_privacidad }}</a>
+        </label>
+      </div>
+      <span class="blog-suscribe-form__error-msg" id="privacyError">Completa este campo obligatorio.</span>
+    </div>
+
+    <button id="button">{{ module.form_text_field_button }}</button>
+    <div id="response"></div>    
+  </form>
+</div>
+
+<script>
+var suscriptionForm = document.getElementById("suscriptionForm");
+var nameFieldGroup = document.getElementById("nameFieldGroup");
+var nameField = document.getElementById("nameField");
+var nameError = document.getElementById("nameError");
+var emailFieldGroup = document.getElementById("emailFieldGroup");
+var emailField = document.getElementById("emailField");
+var emailError = document.getElementById("emailError");
+var privacyFieldGroup = document.getElementById("privacyFieldGroup");
+var privacyField = document.getElementById("privacyField");
+var privacyError = document.getElementById("privacyError");
+var button = document.getElementById("button");
+
+function validateName(name) {
+  return name.length > 2;
+}
+
+function validateEmail(email) {
+  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(String(email).toLowerCase());
+}
+
+function getCookieValue(name) {
+  return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || "";
+}
+
+button.addEventListener("click", function(e) {
+  e.preventDefault();
+
+  var name = nameField.value;
+  var email = emailField.value;
+  var privacy = privacyField.checked;
+  var formErrors = { count: 0, nameError: "", emailError: "", privacyError: "" };
+
+  nameFieldGroup.classList.remove("form-error");
+  emailFieldGroup.classList.remove("form-error");
+  privacyFieldGroup.classList.remove("form-error");
+
+  if (!validateName(name)) {
+    formErrors.count += 1;
+    formErrors.nameError = "El nombre ingresado debe ser más largo.";
+  }
+  
+  if (!validateEmail(email)) {
+    formErrors.count += 1;
+    formErrors.emailError = "La dirección de correo debe tener el formato correcto.";
+  }
+
+  if (!privacy) {
+    formErrors.count += 1;
+    formErrors.privacyError = "Completa este campo obligatorio.";
+  }
+
+  if (formErrors.count === 0) {
+    suscriptionForm.innerHTML = '<span class="blog-suscribe-form__submitted-message">Enviando tu información...</span>';
+    
+    var data = {
+      "submittedAt": Date.now(),
+      "fields": [
+        {
+          "name": "email",
+          "value": email
+        },
+        {
+          "name": "firstname",
+          "value": name
+        }
+      ],
+      "context": {
+        "hutk": getCookieValue("hubspotutk") || "",
+        "pageUri": document.location.href || "",
+        "pageName": document.title || ""
+      },
+      "legalConsentOptions":{
+        "consent":{
+          "consentToProcess": true,
+          "text": "He leído y acepto la política de privacidad.",
+          "communications":[
+            {
+              "value": true,
+              "subscriptionTypeId": 3229214,
+              "text":"He leído y acepto la política de privacidad."
+            }
+          ]
+        }
+      }
+    };    
+    
+    fetch('https://api.hsforms.com/submissions/v3/integration/submit/2860768/5ebec113-dd37-428f-85bc-77e9ace00366', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      suscriptionForm.innerHTML = '<span class="blog-suscribe-form__submitted-message">Gracias por suscribirte!</span>';
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      suscriptionForm.innerHTML = '<span class="blog-suscribe-form__submitted-message">Ocurrió un error, por favor intenta más tarde</span>';
+    });
+  } else {
+    if (formErrors.nameError.length > 0) {
+      nameError.innerHTML = formErrors.nameError;
+      nameFieldGroup.classList.add("form-error");
+    }
+    
+    if (formErrors.emailError.length > 0) {
+      emailError.innerHTML = formErrors.emailError;
+      emailFieldGroup.classList.add("form-error");
+    }
+    
+    if (formErrors.privacyError.length > 0) {
+      privacyError.innerHTML = formErrors.privacyError;
+      privacyFieldGroup.classList.add("form-error");
+    }
+  }
+});
+</script>
+
+</body>
+</html>

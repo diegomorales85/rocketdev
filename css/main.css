@@ -1760,9 +1760,9 @@ select {
   letter-spacing: 0.05em;
 }
 
-.text-orange {
+.text-green {
   --tw-text-opacity: 1;
-  color: rgb(255 120 73 / var(--tw-text-opacity));
+  color: rgb(19 206 102 / var(--tw-text-opacity));
 }
 
 .text-warm-gray-900 {
