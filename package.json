@@ -1,7 +1,7 @@
 {
   "name": "tailwind-protegepyme-landing",
   "version": "1.0",
-  "description": "primera version del sitio, RocketRevenueHQ",
+  "description": "primera version del sitio, ProtegePyme",
   "main": "index.js",
   "scripts": {
     "build": "tailwindcss -i ./src/input.css -o ./css/main.css",
